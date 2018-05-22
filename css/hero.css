@@ -1,3 +1,18 @@
 #edit-canvas {
     max-width: 100%;
 }
+
+.toast {
+    position: fixed;
+    left: 20px;
+    bottom: -80px;
+    background-color: #353535;
+    border-radius: 4px;
+    padding: 15px;
+    color: #dadada;
+    transition-duration: .5s;
+}
+
+.toast.show {
+    bottom: 20px;
+}

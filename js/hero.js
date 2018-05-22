@@ -2,11 +2,11 @@
 /*jslint this: true */
 
 class SlideDate {
-    constructor(date, dayLetter) {
+    constructor(date, dayName, primaryColor, accentColor) {
         this.date = date;
-        this.dayLetter = dayLetter
-        this.primaryColor = dayLetter == "A" ? "cornflowerblue" : "yellow";
-        this.accentColor = dayLetter == "A" ? "white" : "black";
+        this.dayName = dayName;
+        this.primaryColor = primaryColor;
+        this.accentColor = accentColor;
         this.dateString = moment(date, "YYYY-MM-DD").format("dddd, MMMM Do");
     }
 }
@@ -40,20 +40,20 @@ function makeSlide(day, weekdays) {
     ctx.fillStyle = day.accentColor;
     //Write A/B day
     ctx.font = "bold 295px Arial";
-    ctx.fillText(day.dayLetter + " Day", 20, 250);
+    ctx.fillText(day.dayName, 20, 250);
     //Write date
     ctx.font = "bold 90px Arial";
     ctx.fillText(day.dateString, 30, 390);
     //Write weekdays
     var drawHeight = height - 40;
-    weekdays.forEach(function (weekday) {
+    weekdays.reverse().forEach(function (weekday) {
+        //Write day name
         ctx.fillStyle = day.accentColor;
         ctx.font = "bold 40px Arial";
         ctx.textAlign = "end";
-        ctx.fillText(weekday.dayLetter + " Day", division - 20, drawHeight);
-        
-        //
-        ctx.fillStyle = day.accentColor;
+        ctx.fillText(weekday.dayName, division - 20, drawHeight);
+        //Write date
+        ctx.fillStyle = day.primaryColor;
         ctx.font = "normal 40px Arial";
         ctx.textAlign = "start";
         ctx.fillText(weekday.dateString, division + 20, drawHeight);
@@ -73,19 +73,16 @@ function makeZip(slides) {
     });
 }
 
-function makeSlides() {
+function toast(message, duration) {
     "use strict";
-    loadBackground("https://lh3.googleusercontent.com/-mxxjgapBiMs/WwNSrX2HRbI/AAAAAAABu84/ryiIsUjIQhUPDKUfVgyaQFAHR3AGDpooACHMYCw/s0/aphs.jpg", function () {
-        "use strict";
-        var slides = [];
-        for (let i = 0; i < 4; i++) {
-            slides.push(makeSlide("gold", "black", i));
-        };
-        makeZip(slides);
-    });
+    var toaster = $(".toast");
+    toaster.text(message);
+    $(".toast").removeClass("show");
+    $(".toast").addClass("show");
+    setTimeout(function() {
+        $(".toast").removeClass("show");
+    }, duration);
 }
-
-//makeSlides();
 
 $(document).ready(function () {
     $(":file").change(function () {
@@ -96,22 +93,58 @@ $(document).ready(function () {
     })
     loadBackground("https://lh3.googleusercontent.com/-mxxjgapBiMs/WwNSrX2HRbI/AAAAAAABu84/ryiIsUjIQhUPDKUfVgyaQFAHR3AGDpooACHMYCw/s0/aphs.jpg", function () {
         "use strict";
+        //Give an example
         makeSlide(
-            new SlideDate("2018-01-23", "A"), 
-            [new SlideDate("2018-01-24", "B"),
-            new SlideDate("2018-01-25", "A"),
-            new SlideDate("2018-01-26", "B"),
-            new SlideDate("2018-01-27", "B"),
-            new SlideDate("2018-01-28", "A")
+            new SlideDate(moment().format("YYYY-MM-DD"), "A Day", "cornflowerblue", "white"), 
+            [new SlideDate(moment().add(1, "days").format("YYYY-MM-DD"), "B Day"),
+            new SlideDate(moment().add(2, "days").format("YYYY-MM-DD"), "A Day"),
+            new SlideDate(moment().add(3, "days").format("YYYY-MM-DD"), "B Day"),
+            new SlideDate(moment().add(4, "days").format("YYYY-MM-DD"), "A Day"),
+            new SlideDate(moment().add(5, "days").format("YYYY-MM-DD"), "B Day")
             ]
         );
-        setTimeout(function () {
-            makeSlide(new SlideDate("2018-01-29", "B"));
-        }, 100000);
     });
 
     $("#csv").change(function () {
-
+        $("#csv").parse({
+            config: {
+                skipEmptyLines: true,
+                fastMode: true,
+                complete: function(results, file) {
+                    toast("Started making slides, please wait...", 2000);
+                    var slidesData = [];
+                    results.data.forEach(function(value) {
+                        var date = value[0];
+                        var dayText = value[1];
+                        var primaryColor = value[2];
+                        var accentColor = value[3];
+                        if (dayText == "A") { primaryColor = "cornflowerblue"; } else if (dayText == "B") { primaryColor = "yellow"; }
+                        if (dayText == "A") { accentColor = "white"; } else if (dayText == "B") { accentColor = "black"; }
+                        if (dayText == "A") { dayText = "A Day"; } else if (dayText == "B") { dayText = "B Day"; }
+                        slidesData.push(new SlideDate(date, dayText, primaryColor, accentColor));
+                    })
+                    var slideNumber = 0;
+                    var slidesTotal = slidesData.length;
+                    var progressBar = $("#make-progress .progress-bar");
+                    var chunk = 5;
+                    var slideImages = [];
+                    for (var i = 0; i < slidesTotal; i += chunk) {
+                        week = slidesData.slice(i, i + chunk);
+                        week.forEach(function (day) {
+                            slideImages.push(makeSlide(day, week));
+                            slideNumber++;
+                            progressBar.text(slideNumber + "/" + slidesTotal);
+                            progressBar.width(slideNumber / slidesTotal * 100 + "%");
+                        });
+                    }
+                    makeZip(slideImages);
+                    toast("Finished making slides, downloading as .zip file..", 2000);
+                },
+                error: function(err, file, inputElem, reason) {
+                    toast("Error reading .csv file!", 2000)
+                }
+            }
+        });
     })
 })
 
