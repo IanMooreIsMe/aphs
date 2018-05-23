@@ -10,7 +10,7 @@
     border-radius: 4px;
     padding: 15px;
     color: #dadada;
-    transition-duration: .5s;
+    transition-duration: .6s;
 }
 
 .toast.show {

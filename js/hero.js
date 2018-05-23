@@ -1,14 +1,15 @@
 /*global $ Image*/
 /*jslint this: true */
 
-class SlideDate {
-    constructor(date, dayName, primaryColor, accentColor) {
-        this.date = date;
-        this.dayName = dayName;
-        this.primaryColor = primaryColor;
-        this.accentColor = accentColor;
-        this.dateString = moment(date, "YYYY-MM-DD").format("dddd, MMMM Do");
-    }
+function SlideDate(date, dayName, primaryColor, accentColor) {
+    "use strict";
+    return {
+        date: date, 
+        dayName: dayName, 
+        primaryColor: primaryColor, 
+        accentColor: accentColor, 
+        dateString: moment(date, "YYYY-MM-DD").format("dddd, MMMM Do")
+    };
 }
 
 var background;
@@ -84,6 +85,21 @@ function toast(message, duration) {
     }, duration);
 }
 
+var slideImages = [];
+
+function makeSlideBatch(week, batch, total) {
+    "use strict";
+    var progressBar = $("#make-progress .progress-bar");
+    setTimeout(function () {
+        week.forEach(function (day) {
+            slideImages.push(makeSlide(day, week));
+        });
+        progressBar.text(batch * 5 + "/" + total);
+        progressBar.width(batch * 5 / total * 100 + "%");
+    }, batch * 500);
+}
+
+
 $(document).ready(function () {
     $(":file").change(function () {
         var input = $(this),
@@ -95,13 +111,12 @@ $(document).ready(function () {
         "use strict";
         //Give an example
         makeSlide(
-            new SlideDate(moment().format("YYYY-MM-DD"), "A Day", "cornflowerblue", "white"), 
-            [new SlideDate(moment().add(1, "days").format("YYYY-MM-DD"), "B Day"),
-            new SlideDate(moment().add(2, "days").format("YYYY-MM-DD"), "A Day"),
-            new SlideDate(moment().add(3, "days").format("YYYY-MM-DD"), "B Day"),
-            new SlideDate(moment().add(4, "days").format("YYYY-MM-DD"), "A Day"),
-            new SlideDate(moment().add(5, "days").format("YYYY-MM-DD"), "B Day")
-            ]
+            SlideDate(moment().format("YYYY-MM-DD"), "A Day", "cornflowerblue", "white"), 
+            [SlideDate(moment().add(1, "days").format("YYYY-MM-DD"), "B Day"),
+            SlideDate(moment().add(2, "days").format("YYYY-MM-DD"), "A Day"),
+            SlideDate(moment().add(3, "days").format("YYYY-MM-DD"), "B Day"),
+            SlideDate(moment().add(4, "days").format("YYYY-MM-DD"), "A Day"),
+            SlideDate(moment().add(5, "days").format("YYYY-MM-DD"), "B Day")]
         );
     });
 
@@ -111,7 +126,7 @@ $(document).ready(function () {
                 skipEmptyLines: true,
                 fastMode: true,
                 complete: function(results, file) {
-                    toast("Started making slides, please wait...", 2000);
+                    toast("Started making slides, please wait...", 10000);
                     var slidesData = [];
                     results.data.forEach(function(value) {
                         var date = value[0];
@@ -121,27 +136,24 @@ $(document).ready(function () {
                         if (dayText == "A") { primaryColor = "cornflowerblue"; } else if (dayText == "B") { primaryColor = "yellow"; }
                         if (dayText == "A") { accentColor = "white"; } else if (dayText == "B") { accentColor = "black"; }
                         if (dayText == "A") { dayText = "A Day"; } else if (dayText == "B") { dayText = "B Day"; }
-                        slidesData.push(new SlideDate(date, dayText, primaryColor, accentColor));
-                    })
-                    var slideNumber = 0;
+                        slidesData.push(SlideDate(date, dayText, primaryColor, accentColor));
+                    });
                     var slidesTotal = slidesData.length;
-                    var progressBar = $("#make-progress .progress-bar");
                     var chunk = 5;
-                    var slideImages = [];
+                    var batch = 1;
+                    slideImages = [];
                     for (var i = 0; i < slidesTotal; i += chunk) {
                         week = slidesData.slice(i, i + chunk);
-                        week.forEach(function (day) {
-                            slideImages.push(makeSlide(day, week));
-                            slideNumber++;
-                            progressBar.text(slideNumber + "/" + slidesTotal);
-                            progressBar.width(slideNumber / slidesTotal * 100 + "%");
-                        });
+                        makeSlideBatch(week, batch, slidesTotal);
+                        batch++;
                     }
-                    makeZip(slideImages);
-                    toast("Finished making slides, downloading as .zip file..", 2000);
+                    setTimeout(function () {
+                        makeZip(slideImages);
+                        toast("Finished making slides, downloading as .zip file..", 10000);
+                    }, (batch + 1) * 500); 
                 },
                 error: function(err, file, inputElem, reason) {
-                    toast("Error reading .csv file!", 2000)
+                    toast("Error reading .csv file!", 10000)
                 }
             }
         });
