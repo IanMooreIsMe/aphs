@@ -34,7 +34,7 @@
                     <input type="text" class="form-control" data-file-display="csv" disabled>
                 </div>
                 <small class="form-text mb-2">
-                    Simply edit <a href="./files/hero.csv">this sample slides .csv</a> and select it here to begin! The process can take some time and the page may freeze.
+                    Simply edit <a href="./files/hero.csv">this sample slides .csv</a> and select it here to begin! 
                     <a href="#" data-toggle="modal" data-target="#csvHelpModal">More help&hellip;</a>
                 </small>
             </div>
@@ -75,9 +75,18 @@
                     An example row for a custom day could look like <code>2018-06-19,Regents Testing,pink,black</code>. 
                     This would make a slide that says "Regents Testing" with black text on a pink background.
                 </p>
-                <p>Please be sure every week is a group of 5 rows (for Mon-Fri), write "No School" for the day name if there's no school on a weekday. The first row must start on a Monday.</p>
-                <p>Once you finish editing your slides .csv file, simply select it in Calendar Upload section, and then hit Make!</p>
-                <p>The page may likely freeze for about 30 seconds while all slides are made, and then when it completes a .zip file will be automatically downloaded containing all the slides.</p>
+                <p>
+                    Please be sure every week is a group of 5 rows (for Mon-Fri), write "No School" for the day name if there's no school on a weekday. 
+                    The first row must start on a Monday.
+                </p>
+                <p>
+                    Once you finish editing your slides .csv file, simply select it in Calendar Upload section, and the process will begin automatically. 
+                    It can take some time and the page may freeze depending on how powerful the computer you are on is. All the image processing is done right here in the browser.
+                </p>
+                <p>
+                    The progress bar on the bottom will track the status on the slide generation, 
+                    and then when it is complete a .zip file will be automatically downloaded containing all the slides.
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-dismiss="modal">Thanks!</button>
@@ -93,6 +102,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js" integrity="sha256-L3S3EDEk31HcLA5C6T2ovHvOcD80+fgqaCDt2BAi92o=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.4.0/papaparse.min.js" integrity="sha256-VMBgkjmviMPTm6C9z5RpAbEAAI2npANFKYqhlnkXsZ4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js" integrity="sha256-loi+HIzG37ZU3Ch2Hdmnuz+UrPHOV+mg/iGoJM4CI18=" crossorigin="anonymous"></script>
 <script src="./js/hero.min.js"></script>
 
 </body>
