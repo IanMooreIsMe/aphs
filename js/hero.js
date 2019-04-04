@@ -26,6 +26,18 @@ function loadBackground(src, callback) {
     img.src = src;
 }
 
+var logo;
+function loadLogo(src, callback) {
+    "use strict";
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+        logo = img;
+        callback();
+    };
+    img.src = src;
+}
+
 
 function makeSlide(day, weekdays) {
     "use strict";
@@ -33,7 +45,7 @@ function makeSlide(day, weekdays) {
     var width = 1920, height = 1080, division = width * 0.72;
     ctx.canvas.width = width;
     ctx.canvas.height = height;
-    //Drawn image and darken/lighten
+    //Add image and darken/lighten
     ctx.drawImage(background, 0, 0, width, height);
     if (tinycolor(day.accentColor).isLight()) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
@@ -45,6 +57,12 @@ function makeSlide(day, weekdays) {
     ctx.fillStyle = day.primaryColor;
     ctx.fillRect(0, 0, division, height);
     ctx.fillStyle = day.accentColor;
+    //Add logo
+    var logoScale = .70,
+        logoHeight = logo.height * logoScale,
+        logoWidth = logo.width * logoScale,
+        logoOffset = 50;
+    ctx.drawImage(logo, logoOffset, height - logoHeight - logoOffset, logoWidth, logoHeight);
     //Write A/B day
     ctx.font = "bold 295px " + font;
     ctx.fillText(day.dayName, 30, 270);
@@ -111,10 +129,10 @@ function toast(message, duration) {
     "use strict";
     var toaster = $(".toast");
     toaster.text(message);
-    $(".toast").removeClass("show");
-    $(".toast").addClass("show");
+    toaster.removeClass("show");
+    toaster.addClass("show");
     setTimeout(function() {
-        $(".toast").removeClass("show");
+        toaster.removeClass("show");
     }, duration);
 }
 
@@ -141,17 +159,19 @@ $(document).ready(function () {
         label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
         $("[data-file-display=" + this.id + "]").val(label);
     });
-    loadBackground("https://lh3.googleusercontent.com/-Tzhft65Sdk8/WwcOua6mXNI/AAAAAAABvDU/gJYQdTu1VOoH0D1SL251NEcwq4URUjUswCHMYCw/s0/aphs-front.jpg", function () {
-        "use strict";
-        //Give an example
-        makeSlide(
-            slideDate(moment().format("YYYY-MM-DD"), "B Day", "yellow", "black"),
-            [slideDate(moment().add(5, "days").format("YYYY-MM-DD"), "A Day"),
-            slideDate(moment().add(4, "days").format("YYYY-MM-DD"), "B Day"),
-            slideDate(moment().add(3, "days").format("YYYY-MM-DD"), "A Day"),
-            slideDate(moment().add(2, "days").format("YYYY-MM-DD"), "B Day"),
-            slideDate(moment().add(1, "days").format("YYYY-MM-DD"), "A Day")]
-        );
+    loadBackground("img/aphs-front.jpg", function () {
+        loadLogo("img/aphs-logo.png", function () {
+            "use strict";
+            //Give an example
+            makeSlide(
+                slideDate(moment().format("YYYY-MM-DD"), "B Day", "yellow", "black"),
+                [slideDate(moment().add(5, "days").format("YYYY-MM-DD"), "A Day"),
+                slideDate(moment().add(4, "days").format("YYYY-MM-DD"), "B Day"),
+                slideDate(moment().add(3, "days").format("YYYY-MM-DD"), "A Day"),
+                slideDate(moment().add(2, "days").format("YYYY-MM-DD"), "B Day"),
+                slideDate(moment().add(1, "days").format("YYYY-MM-DD"), "A Day")]
+            );
+        });
     });
 
     $("#csv").change(function () {
@@ -167,9 +187,9 @@ $(document).ready(function () {
                         var dayText = value[1];
                         var primaryColor = value[2];
                         var accentColor = value[3];
-                        if (dayText == "A") { primaryColor = "cornflowerblue"; } else if (dayText == "B") { primaryColor = "yellow"; }
-                        if (dayText == "A") { accentColor = "white"; } else if (dayText == "B") { accentColor = "black"; }
-                        if (dayText == "A") { dayText = "A Day"; } else if (dayText == "B") { dayText = "B Day"; }
+                        if (dayText === "A") { primaryColor = "cornflowerblue"; } else if (dayText === "B") { primaryColor = "yellow"; }
+                        if (dayText === "A") { accentColor = "white"; } else if (dayText === "B") { accentColor = "black"; }
+                        if (dayText === "A") { dayText = "A Day"; } else if (dayText === "B") { dayText = "B Day"; }
                         slidesData.push(slideDate(date, dayText, primaryColor, accentColor));
                     });
                     var slidesTotal = slidesData.length;
